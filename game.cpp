@@ -2,9 +2,9 @@
 
 struct Anim
 {
-    Rectangle rec;
-    Vector2 pos;
-    int frame;
+    Rectangle rec; // rectangle around character
+    Vector2 pos;   // position of character
+    int frame;     // position on scarfy pic, frame 0 is first pic of character
     float updateTime;
     float runningTime;
 };
@@ -14,10 +14,9 @@ int main()
 {
     const int windowWidth{1800};  // variable to set window width
     const int windowHeight{1200}; // variable to set window height
-    const int gravity{1000};      // gravity varaible
+    const int gravity{1000};      // gravity varaible (pixels per second)
 
-    InitWindow(windowWidth, windowHeight, "Eoin"); // Show the game window with title
-
+    InitWindow(windowWidth, windowHeight, "Eoin");                         // Show the game window with title
     Texture2D background = LoadTexture("resources/forest-background.png"); // background variable
 
     // character variables
@@ -47,15 +46,15 @@ int main()
     // movement and collison varables
     int obVel{-100};
     int velocity{0};
-    const int jumpHeight{500};
-    bool jumped{false};
+    const int jumpHeight{500}; // characters jump height in pixels
+    bool jumped{false};        // if characte has jumped or not
     int speed{200};
-    bool collision{};
+    bool collision{}; // if character has hit another object
 
-    SetTargetFPS(60);
+    SetTargetFPS(60); // Set target FPS (maximum)
     while (!WindowShouldClose())
     {
-        const float deltaTime{GetFrameTime()};
+        const float deltaTime{GetFrameTime()}; // time since last frame
         Rectangle obstacleRec{
             obPos.x,
             obPos.y,
@@ -67,6 +66,7 @@ int main()
             scarfyAnim.pos.y,
             scarfyAnim.rec.height,
             scarfyAnim.rec.width};
+
         if (CheckCollisionRecs(scarfyRec, obstacleRec))
         {
             collision = true;
@@ -82,8 +82,8 @@ int main()
             {
                 scarfyAnim.runningTime = 0.0;
                 scarfyAnim.rec.x = scarfyAnim.frame * scarfyAnim.rec.width;
-                scarfyAnim.frame++;
-                if (scarfyAnim.frame > 5)
+                scarfyAnim.frame++;       // increments frame by one
+                if (scarfyAnim.frame > 5) // if character is on his last frame go back to frame 0
                 {
                     scarfyAnim.frame = 0;
                 }
@@ -91,7 +91,7 @@ int main()
         }
         if (IsKeyReleased(KEY_D) && !jumped)
         {
-            scarfyAnim.frame = 0;
+            scarfyAnim.frame = 0; // character is on his first frame (still)
             scarfyAnim.rec.x = scarfyAnim.frame * scarfyAnim.rec.width;
         }
 
@@ -105,8 +105,8 @@ int main()
             {
                 scarfyAnim.runningTime = 0.0;
                 scarfyAnim.rec.x = scarfyAnim.frame * scarfyAnim.rec.width;
-                scarfyAnim.frame++;
-                if (scarfyAnim.frame > 5)
+                scarfyAnim.frame++;       // increments frame by one
+                if (scarfyAnim.frame > 5) // if character is on his last frame go back to frame 0
                 {
                     scarfyAnim.frame = 0;
                 }
@@ -114,10 +114,11 @@ int main()
         }
         if (IsKeyReleased(KEY_A) && !jumped)
         {
-            scarfyAnim.frame = 0;
+            scarfyAnim.frame = 0; // character is on his first frame (still)
             scarfyAnim.rec.x = scarfyAnim.frame * scarfyAnim.rec.width;
         }
-        BeginDrawing();
+
+        BeginDrawing(); // Setup canvas to start drawing
 
         if (scarfyAnim.pos.y >= windowHeight - scarfy.height)
         {
@@ -129,27 +130,27 @@ int main()
             velocity += gravity * deltaTime;
             jumped = true;
         }
-        if (IsKeyPressed(KEY_SPACE) && !jumped)
+        if (IsKeyPressed(KEY_SPACE) && !jumped) // make character jump
         {
             velocity -= jumpHeight;
         }
 
-        scarfyAnim.pos.y += velocity * deltaTime;
+        scarfyAnim.pos.y += velocity * deltaTime; // acount for delta time frames
         obPos.x += obVel * deltaTime;
-        ClearBackground(WHITE);
+        DrawTexture(background, 0, 0, WHITE); // add background image
+
         if (collision)
         {
-            DrawTexture(background, 0, 0, WHITE);                               // add background image
-            DrawText("GAME OVER", windowWidth / 4, windowHeight / 2, 150, RED); // Say Game Over on screen
+            DrawText("GAME OVER", windowWidth / 4, windowHeight / 2, 150, RED); // say Game Over on screen
         }
         else
         {
-            DrawTexture(background, 0, 0, WHITE);                          // add background image
-            DrawTextureRec(scarfy, scarfyAnim.rec, scarfyAnim.pos, WHITE); // DrawRectangle(windowWidth/2,posY,width,height,GREEN);
-            DrawTextureRec(obstacle, obRec, obPos, WHITE);
+            DrawTextureRec(scarfy, scarfyAnim.rec, scarfyAnim.pos, WHITE); // add character
+            DrawTextureRec(obstacle, obRec, obPos, WHITE);                 // add obstacle
         }
         EndDrawing();
     }
+    UnloadTexture(background); // unload texture from memory
     UnloadTexture(scarfy);
     UnloadTexture(obstacle);
     CloseWindow();
