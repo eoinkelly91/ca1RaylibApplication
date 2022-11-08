@@ -17,6 +17,10 @@ int main()
     const int gravity{1000};      // gravity varaible (pixels per second)
 
     InitWindow(windowWidth, windowHeight, "Eco Warrior");                  // Show the game window with title
+    InitAudioDevice();                                                     // Initialize audio device
+    Music music = LoadMusicStream("resources/rhythm_garden.mp3");          // load music
+    PlayMusicStream(music);                                                // play music
+    float timePlayed{0.0f};                                                // variable to loop music
     Texture2D background = LoadTexture("resources/forest-background.png"); // background variable
 
     // character variables
@@ -44,16 +48,20 @@ int main()
     obPos.y = windowHeight - obRec.height;                 // set vector y axis positon
 
     // movement and collison varables
-    int obVel{-100};
+    int obVel{-200};
     int velocity{0};
     int speed{200};
-    const int jumpHeight{700}; // characters jump height in pixels
-    bool jumped{false};        // if character has jumped or not
-    bool collision{};          // if character has hit another object
+    const int jumpHeight{1000}; // characters jump height in pixels
+    bool jumped{false};         // if character has jumped or not
+    bool collision{};           // if character has hit another object
 
     SetTargetFPS(60);            // Set target FPS (maximum)
     while (!WindowShouldClose()) // loop while window open
     {
+        UpdateMusicStream(music);
+        timePlayed = GetMusicTimePlayed(music) / GetMusicTimeLength(music);
+        if (timePlayed >= 1.0f) // Loop the music
+            SeekMusicStream(music, 0);
         const float deltaTime{GetFrameTime()}; // time since last frame
         // create rectangle for character
         Rectangle warriorRec{
@@ -151,8 +159,10 @@ int main()
         }
         EndDrawing();
     }
+    UnloadMusicStream(music);  // Unload music stream buffers from RAM
     UnloadTexture(background); // unload texture from memory
-    UnloadTexture(warrior);
-    UnloadTexture(obstacle);
-    CloseWindow();
+    UnloadTexture(warrior);    // unload texture from memory
+    UnloadTexture(obstacle);   // unload texture from memory
+    CloseAudioDevice();        // Close audio device (music streaming is automatically stopped)
+    CloseWindow();             // close game window
 }
