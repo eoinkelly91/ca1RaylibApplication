@@ -37,10 +37,10 @@ int main()
     warriorAnim.runningTime = 0.0;                                   // initialise movement varaible
 
     // object variables
-    Texture2D obstacle = LoadTexture("resources/log.png"); // load object sprite
-    Rectangle obRec;                                       // create rectangle for object
-    obRec.width = obstacle.width;                          // set object width
-    obRec.height = obstacle.height;                        // set object height
+    Texture2D obstacle = LoadTexture("resources/log.png"); // load obstacle sprite
+    Rectangle obRec;                                       // create rectangle for obstacle
+    obRec.width = obstacle.width;                          // set obstacle width
+    obRec.height = obstacle.height;                        // set obstacle height
     obRec.x = 0;                                           // set rectangle x axis positon
     obRec.y = 0;                                           // set rectangle y axis positon
     Vector2 obPos;                                         // vector represents geometrical properties of object
@@ -55,21 +55,25 @@ int main()
     bool jumped{false};         // if character has jumped or not
     bool collision{};           // if character has hit another object
 
+    int score{0}; // player score
+
     SetTargetFPS(60);            // Set target FPS (maximum)
     while (!WindowShouldClose()) // loop while window open
     {
+        DrawTexture(background, 0, 0, WHITE); // add background image
         UpdateMusicStream(music);
         timePlayed = GetMusicTimePlayed(music) / GetMusicTimeLength(music);
         if (timePlayed >= 1.0f) // Loop the music
             SeekMusicStream(music, 0);
         const float deltaTime{GetFrameTime()}; // time since last frame
+
         // create rectangle for character
         Rectangle warriorRec{
             warriorAnim.pos.x,
             warriorAnim.pos.y,
             warriorAnim.rec.height,
             warriorAnim.rec.width};
-        // create rectangle for object
+        // create rectangle for obstacle
         Rectangle obstacleRec{
             obPos.x,
             obPos.y,
@@ -144,18 +148,24 @@ int main()
             velocity -= jumpHeight;
         }
 
-        warriorAnim.pos.y += velocity * deltaTime; // acount for delta time frames
-        obPos.x += obVel * deltaTime;
-        DrawTexture(background, 0, 0, WHITE); // add background image
-
-        if (collision)
+        if (collision) // if character rectangle collides with obstacle rectangle
         {
-            DrawText("GAME OVER", windowWidth / 4, windowHeight / 2, 150, RED); // say Game Over on screen
+            DrawText("GAME OVER", windowWidth / 4, windowHeight / 2, 150, RED);                       // say Game Over on screen
+            DrawText(TextFormat("SCORE: %i", score), windowWidth / 3, (windowHeight - 450), 80, RED); // give score on screen
         }
         else
         {
-            DrawTextureRec(warrior, warriorAnim.rec, warriorAnim.pos, WHITE); // add character
-            DrawTextureRec(obstacle, obRec, obPos, WHITE);                    // add obstacle
+            DrawText(TextFormat("SCORE: %i", score), windowWidth / 10, windowHeight / 6, 80, RED); // give score on screen
+            DrawTextureRec(warrior, warriorAnim.rec, warriorAnim.pos, WHITE);                      // add character
+            DrawTextureRec(obstacle, obRec, obPos, WHITE);                                         // add obstacle
+            warriorAnim.pos.y += velocity * deltaTime;                                             // acount for delta time frames
+            obPos.x += obVel * deltaTime;                                                          // move obstacle on x axis
+            if (obPos.x < 1)                                                                       // once obstacle goes off screen on x axis
+            {
+                obPos.x = windowWidth - obRec.width; // reset obstacles position so it can come again
+                obVel -= 50;                         // increase obstacle velocity
+                score++;                             // increase the score by one
+            }
         }
         EndDrawing();
     }
